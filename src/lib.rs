@@ -1,1 +1,9 @@
+pub mod app;
+pub mod board;
+pub mod events;
+pub mod game;
+pub mod geometry;
+pub mod hex;
+pub mod highlights;
 pub mod tiered_prng;
+pub mod ui;

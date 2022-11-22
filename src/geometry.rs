@@ -1,3 +1,5 @@
+// This code taken from https://github.com/Quantumplation/bevy-hex-example
+
 use crate::hex::HexCoord;
 
 /// The ratio between a circle touching the points of a hex grid (the outer radius),

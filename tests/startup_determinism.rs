@@ -1,19 +1,13 @@
 use bevy::prelude::*;
 use rand::Rng;
-use stackrankdice::tiered_prng::{PrngMapResource, PrngPlugin, PrngResource};
+use stackrankdice::app::build_app;
+use stackrankdice::tiered_prng::PrngMapResource;
 
 #[test]
 fn fixed_world_undef_env_seed() {
     // Setup app
     let mut app = App::new();
-
-    // PRNG setup
-    app.insert_resource(PrngResource {
-        world_seed: 4242,
-        env_seed: 0,
-    });
-
-    app.add_plugin(PrngPlugin); // Adds Prng based resources for subcomponents
+    build_app(&mut app, 4242, 0, 2, true);
 
     let mut map_prng = app.world.get_resource_mut::<PrngMapResource>().unwrap();
 

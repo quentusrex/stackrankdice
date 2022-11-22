@@ -1,3 +1,5 @@
+// This code taken from https://github.com/Quantumplation/bevy-hex-example
+
 /// A coordinate on a hex grid, representing distances along the various directions of travel
 /// Invariant: In order to represent a valid hex coordinate, q + r + s must equal 0
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
