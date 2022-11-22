@@ -126,7 +126,7 @@ fn setup(
     // Camera
     commands
         // camera
-        .spawn_bundle(Camera3dBundle {
+        .spawn(Camera3dBundle {
             projection: OrthographicProjection {
                 scaling_mode: ScalingMode::FixedVertical(3.0),
                 scale: 10.0,
@@ -141,13 +141,13 @@ fn setup(
                 .looking_at(Vec3::default(), Vec3::Y),
             ..Default::default()
         })
-        .insert_bundle(PickingCameraBundle::default())
+        .insert(PickingCameraBundle::default())
         // .insert(UiCameraConfig { show_ui: false })
         .insert(Name::new("Board Camera"));
 
     // Current Turn Text
     commands
-        .spawn_bundle(
+        .spawn(
             TextBundle::from_section(
                 "current turn",
                 TextStyle {
@@ -171,7 +171,7 @@ fn setup(
         .insert(StackRankDiceUI);
 
     // Dice Roll camera
-    commands.spawn_bundle(Camera2dBundle {
+    commands.spawn(Camera2dBundle {
         camera: Camera {
             // priority: 2,
             ..default()
@@ -181,7 +181,7 @@ fn setup(
 
     for (i, dice_camera) in dice_plugin_settings.render_handles.iter().enumerate() {
         commands
-            .spawn_bundle(ImageBundle {
+            .spawn(ImageBundle {
                 image: UiImage(dice_camera.clone()),
                 style: Style {
                     size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
@@ -196,7 +196,7 @@ fn setup(
 
         // Dice Throw Sum Text
         commands
-            .spawn_bundle(
+            .spawn(
                 TextBundle::from_section(
                     "",
                     TextStyle {
@@ -224,7 +224,7 @@ fn setup(
 
     // Title Text
     commands
-        .spawn_bundle(
+        .spawn(
             TextBundle::from_section(
                 "STACK RANK DICE",
                 TextStyle {
@@ -299,13 +299,13 @@ fn draw_board(
             }),
         };
 
-        let mut mesh = generate_hex_region_mesh(region);
-        mesh.generate_outline_normals().unwrap();
+        let mesh = generate_hex_region_mesh(region);
+        // mesh.generate_outline_normals().unwrap();
         let mesh = meshes.add(mesh);
         // Theese micro-height differences are to make otline rendering visible.
         // Otherwise tiles with the same height will be rendered as one.
         let height: f32 = 1.0 + map_prng.rng.gen_range(0.0..=0.0001);
-        let mut bundle_command = commands.spawn_bundle(PbrBundle {
+        let mut bundle_command = commands.spawn(PbrBundle {
             mesh: mesh.clone(),
             material: material.clone(),
             transform: Transform::from_translation(Vec3::new(
@@ -317,11 +317,12 @@ fn draw_board(
         });
 
         bundle_command
-            .insert_bundle(OutlineBundle {
+            .insert(OutlineBundle {
                 outline: Outline {
                     visible: true,
-                    colour: Color::rgba(0.0, 0.0, 0.0, 1.0),
+                    // colour: Color::rgba(0.0, 0.0, 0.0, 1.0).into(),
                     width: 0.5,
+                    ..default()
                 },
                 ..default()
             })
@@ -330,7 +331,7 @@ fn draw_board(
             .insert(StackRankDiceGameBoardElement);
 
         if is_region_playable {
-            bundle_command.insert_bundle(PickableBundle::default());
+            bundle_command.insert(PickableBundle::default());
         }
     }
 
@@ -362,20 +363,20 @@ fn draw_board(
             }
 
             commands
-                .spawn_bundle(PbrBundle {
+                .spawn(PbrBundle {
                     mesh: dice_mesh_handle.clone(),
                     material: material_handle.clone(),
                     transform: Transform::from_xyz(pos[0], y_pos, z_pos)
                         .with_scale(Vec3::splat(0.4)),
                     ..default()
                 })
-                .insert(OutlineStencil {})
+                .insert(OutlineStencil { offset: 1.0 })
                 .insert(Name::new("Dice"))
                 .insert(StackRankDiceGameBoardElement);
         }
 
         commands
-            .spawn_bundle(PointLightBundle {
+            .spawn(PointLightBundle {
                 point_light: PointLight {
                     intensity: 100.0,
                     ..Default::default()
@@ -388,7 +389,7 @@ fn draw_board(
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct SelectedRegion {
     pub entity: Option<Entity>,
     pub region: Option<Region>,

@@ -11,11 +11,12 @@ use crate::{
 
 /// Resource that defines the default highlighting assets to use. This can be overridden per-entity
 /// with the [`Highlighting`] component.
+#[derive(Resource)]
 pub struct StackRankDiceDefaultHighlighting<T: StackRankDiceHighlightable + ?Sized> {
-    pub hovered: Handle<T::HighlightAsset>,
-    pub pressed: Handle<T::HighlightAsset>,
-    pub selected: Handle<T::HighlightAsset>,
-    pub opponent: Handle<T::HighlightAsset>,
+    pub hovered: Handle<T>,
+    pub pressed: Handle<T>,
+    pub selected: Handle<T>,
+    pub opponent: Handle<T>,
 }
 
 impl<T: StackRankDiceHighlightable> FromWorld for StackRankDiceDefaultHighlighting<T> {
@@ -25,26 +26,18 @@ impl<T: StackRankDiceHighlightable> FromWorld for StackRankDiceDefaultHighlighti
 }
 
 /// This trait makes it possible for highlighting to be generic over any type of asset.
-pub trait StackRankDiceHighlightable: Default {
+pub trait StackRankDiceHighlightable: Default + Asset {
     /// The asset used to highlight the picked object. For a 3D mesh, this would probably be [`StandardMaterial`].
-    type HighlightAsset: Asset;
-    fn highlight_defaults(
-        materials: Mut<Assets<Self::HighlightAsset>>,
-    ) -> StackRankDiceDefaultHighlighting<Self>;
-    fn materials(world: &mut World) -> Mut<Assets<Self::HighlightAsset>> {
+    fn highlight_defaults(materials: Mut<Assets<Self>>) -> StackRankDiceDefaultHighlighting<Self>;
+    fn materials(world: &mut World) -> Mut<Assets<Self>> {
         world
-            .get_resource_mut::<Assets<Self::HighlightAsset>>()
+            .get_resource_mut::<Assets<Self>>()
             .expect("Failed to get resource")
     }
 }
-
-#[derive(Default)]
-pub(crate) struct StackRankDiceMaterialHighlight;
-impl StackRankDiceHighlightable for StackRankDiceMaterialHighlight {
-    type HighlightAsset = StandardMaterial;
-
+impl StackRankDiceHighlightable for StandardMaterial {
     fn highlight_defaults(
-        mut materials: Mut<Assets<Self::HighlightAsset>>,
+        mut materials: Mut<Assets<Self>>,
     ) -> StackRankDiceDefaultHighlighting<Self> {
         StackRankDiceDefaultHighlighting {
             hovered: materials.add(StandardMaterial {
@@ -75,22 +68,40 @@ impl StackRankDiceHighlightable for StackRankDiceMaterialHighlight {
     }
 }
 
-pub(crate) struct StakRankDiceHighlightablePickingPlugins;
-impl PluginGroup for StakRankDiceHighlightablePickingPlugins {
-    fn build(&mut self, group: &mut PluginGroupBuilder) {
-        group.add(CustomStackRankDiceHighlightPlugin(
-            StackRankDiceMaterialHighlight,
-        ));
+impl StackRankDiceHighlightable for ColorMaterial {
+    fn highlight_defaults(
+        mut materials: Mut<Assets<Self>>,
+    ) -> StackRankDiceDefaultHighlighting<Self> {
+        StackRankDiceDefaultHighlighting {
+            hovered: materials.add(ColorMaterial {
+                color: Color::rgb(0.85, 0.0, 0.85),
+                ..default()
+            }),
+            pressed: materials.add(ColorMaterial {
+                color: Color::rgb(0.85, 0.0, 0.85),
+                ..default()
+            }),
+            selected: materials.add(ColorMaterial {
+                color: Color::rgb(0.95, 0.0, 0.85),
+                ..default()
+            }),
+            opponent: materials.add(ColorMaterial {
+                color: Color::rgba(0.95, 0.0, 0.0, 0.7),
+                ..default()
+            }),
+        }
     }
 }
 
 pub(crate) struct StackRankDicePickingPlugins;
 
 impl PluginGroup for StackRankDicePickingPlugins {
-    fn build(&mut self, group: &mut PluginGroupBuilder) {
-        group.add(PickingPlugin);
-        group.add(InteractablePickingPlugin);
-        StakRankDiceHighlightablePickingPlugins.build(group);
+    fn build(self) -> PluginGroupBuilder {
+        PluginGroupBuilder::start::<Self>()
+            .add(PickingPlugin)
+            .add(InteractablePickingPlugin)
+            .add(CustomStackRankDiceHighlightPlugin::<StandardMaterial>::default())
+            .add(CustomStackRankDiceHighlightPlugin::<ColorMaterial>::default())
     }
 }
 
@@ -122,7 +133,7 @@ where
                         simple_criteria(state.enable_highlighting)
                     })
                     .with_system(
-                        get_initial_mesh_highlight_asset::<T::HighlightAsset>
+                        get_initial_mesh_highlight_asset::<T>
                             .after(PickingSystem::UpdateIntersections)
                             .before(PickingSystem::Highlighting),
                     )
@@ -143,9 +154,9 @@ pub fn mesh_highlighting<T: 'static + StackRankDiceHighlightable + Send + Sync>(
         (
             Entity,
             &Interaction,
-            &mut Handle<T::HighlightAsset>,
+            &mut Handle<T>,
             Option<&Selection>,
-            &Highlighting<T::HighlightAsset>,
+            &Highlighting<T>,
         ),
         Or<(Changed<Interaction>, Changed<Selection>)>,
     >,

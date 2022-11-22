@@ -114,8 +114,8 @@ pub(crate) fn event_region_clash(
 
         dice_roll_started_writer.send(dice_roll_started);
 
-        commands.spawn().insert(DiceRollTimer {
-            timer: Timer::new(Duration::from_secs(3), false),
+        commands.spawn(()).insert(DiceRollTimer {
+            timer: Timer::new(Duration::from_secs(3), TimerMode::Once),
         });
     }
 }
@@ -300,7 +300,7 @@ pub(crate) fn event_game_over(
         }
 
         commands
-            .spawn_bundle(
+            .spawn(
                 TextBundle::from_section(
                     format!("Player {} wins!", e.winner + 1),
                     TextStyle {

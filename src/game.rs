@@ -1,8 +1,8 @@
-use std::collections::HashMap;
-
-use bevy::prelude::Component;
+use bevy::prelude::*;
 use rand::{seq::IteratorRandom, Rng};
 use rand_chacha::ChaCha20Rng;
+
+use std::collections::HashMap;
 
 use crate::hex::HexCoord;
 
@@ -15,6 +15,7 @@ pub struct Board {
     pub regions: Vec<Region>,
 }
 
+#[derive(Resource)]
 pub struct GameState {
     pub board: Board,
     pub turn_of_player: usize,
