@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bevy::prelude::{Component, Entity};
+use bevy::prelude::{Component, Entity, Resource};
 use rand::{seq::IteratorRandom, Rng};
 use rand_chacha::ChaCha20Rng;
 
@@ -16,7 +16,7 @@ pub struct Board {
     pub regions: Vec<Region>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Resource)]
 pub struct GameState {
     pub board: Board,
     pub turn_of_player: usize,
@@ -245,7 +245,7 @@ pub fn generate_board(number_of_players: usize, mut rng: ChaCha20Rng) -> Board {
     board
 }
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct SelectedRegion {
     pub entity: Option<Entity>,
     pub region: Option<Region>,

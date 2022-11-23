@@ -1,10 +1,8 @@
-use bevy::app::App;
-use bevy::app::Plugin;
-use bevy::ecs::world::FromWorld;
-use bevy::ecs::world::World;
+use bevy::prelude::*;
 use rand::SeedableRng;
 use rand_chacha::ChaCha20Rng;
 
+#[derive(Resource)]
 pub struct PrngResource {
     pub world_seed: u64,
     pub env_seed: u64,
@@ -12,6 +10,7 @@ pub struct PrngResource {
 
 pub struct PrngPlugin;
 
+#[derive(Resource)]
 pub struct PrngMapResource {
     pub rng: ChaCha20Rng,
 }

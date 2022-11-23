@@ -63,7 +63,7 @@ pub(crate) fn setup_ui(
     // Camera
     commands
         // camera
-        .spawn_bundle(Camera3dBundle {
+        .spawn(Camera3dBundle {
             projection: OrthographicProjection {
                 scaling_mode: ScalingMode::FixedVertical(3.0),
                 scale: 10.0,
@@ -78,13 +78,13 @@ pub(crate) fn setup_ui(
                 .looking_at(Vec3::default(), Vec3::Y),
             ..Default::default()
         })
-        .insert_bundle(PickingCameraBundle::default())
+        .insert(PickingCameraBundle::default())
         // .insert(UiCameraConfig { show_ui: false })
         .insert(Name::new("Board Camera"));
 
     // Current Turn Text
     commands
-        .spawn_bundle(
+        .spawn(
             TextBundle::from_section(
                 "current turn",
                 TextStyle {
@@ -108,7 +108,7 @@ pub(crate) fn setup_ui(
         .insert(StackRankDiceUI);
 
     // Dice Roll camera
-    commands.spawn_bundle(Camera2dBundle {
+    commands.spawn(Camera2dBundle {
         camera: Camera {
             // priority: 2,
             ..default()
@@ -118,7 +118,7 @@ pub(crate) fn setup_ui(
 
     for (i, dice_camera) in dice_plugin_settings.render_handles.iter().enumerate() {
         commands
-            .spawn_bundle(ImageBundle {
+            .spawn(ImageBundle {
                 image: UiImage(dice_camera.clone()),
                 style: Style {
                     size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
@@ -133,7 +133,7 @@ pub(crate) fn setup_ui(
 
         // Dice Throw Sum Text
         commands
-            .spawn_bundle(
+            .spawn(
                 TextBundle::from_section(
                     "",
                     TextStyle {
@@ -161,7 +161,7 @@ pub(crate) fn setup_ui(
 
     // Title Text
     commands
-        .spawn_bundle(
+        .spawn(
             TextBundle::from_section(
                 "STACK RANK DICE",
                 TextStyle {
